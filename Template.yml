@@ -7,6 +7,34 @@ Globals:
     MemorySize: 128
 
 Resources:
+  ResumeTyrrellS3:
+    Type: 'AWS::S3::Bucket'
+    Properties:
+      BucketName: test.tyrrelldmb.com
+      WebsiteConfiguration:
+        IndexDocument: index.html
+
+  ResumeTomaskoEuBucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket:
+        Ref: ResumeTyrrellS3
+      PolicyDocument:
+        Statement:
+          - Action:
+            - 's3:GetObject'
+            Effect: Allow
+            Resource:
+              'Fn::Join':
+                - ''
+                - - 'arn:aws:s3:::'
+                  - Ref: ResumeTomaskoEuS3
+                  - /*
+            Principal: '*'
+            Condition:
+              IpAddress:
+                'aws:SourceIp': '52.216.147.51/32'
+
   ResumeViewerCounterDynamo:
     Type: AWS::DynamoDB::Table
     Properties:
