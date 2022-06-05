@@ -1,0 +1,9 @@
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  CloudResumeChallengeS3:
+    Type: 'AWS'::S3::Bucket'
+    Properties:
+      BucketName: test.TyrrellDMB.com
+        WebsiteConfiguration:
+          index.html
