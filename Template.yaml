@@ -1,9 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
+Globals:
+  Function:
+    Runtime: python3.9
+    MemorySize: 128
+
 Resources:
-  CloudResumeChallengeS3:
-    Type: 'AWS'::S3::Bucket'
+  ResumeViewerCounterDynamo:
+    Type: AWS::DynamoDB::Table
     Properties:
-      BucketName: test.TyrrellDMB.com
-        WebsiteConfiguration:
-          index.html
+      TableName: ViewCounter
+      AttributeDefinitions:
+        - 
+          AttributeName: 'viewer_count'
+          AttributeType: 'S'
+      KeySchema:
+      -
+        AttributeName: 'viewer_count'
+        KeyType: 'N'
+      ProvisionedThroughput:
+        ReadCapacityUnits: 2
+        WriteCapacityUnits: 2
+
+  ViewerCounterFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: count/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: ViewCounter
+      Events:
+        ViewCounter:
+          Type: Api
+          Properties:
+            Path: /get-viewer-count
+            Method: get
+
+Outputs:
+  ViewerCounterApi:
+    Description: "API Gateway endpoint URL for Prod stage for Viewer count function"
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get-viewer-count/"
+  ViewerCounterFunction:
+    Description: "Visitor count Lambda Function ARN"
+    Value: !GetAtt ViewerCounterFunction.Arn
+  ViewerCounterFunctionIamRole:
+    Description: "Implicit IAM Role created for wiewer count function"
+    Value: !GetAtt ViewerCounterFunctionRole.Arn
